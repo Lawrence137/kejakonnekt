@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
+import { MobileNav } from "@/components/mobile-nav";
+import { navLinks } from "@/config/nav";
 
 export function SiteHeader() {
   return (
@@ -12,20 +14,23 @@ export function SiteHeader() {
           Keja<span className="text-primary">Konnect</span>
         </Link>
 
-        <nav className="flex items-center gap-2">
-          <div className="hidden sm:block">
-            <Link href="/listings" className={buttonVariants({ variant: "ghost" })}>
-              Browse houses
+        {/* Desktop menu */}
+        <nav className="hidden items-center gap-2 md:flex">
+          {navLinks.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              className={buttonVariants({
+                variant: link.highlight ? "default" : "ghost",
+              })}
+            >
+              {link.label}
             </Link>
-          </div>
-          <Link
-            href="/dashboard"
-            className={`${buttonVariants({ variant: "outline" })} whitespace-nowrap`}
-          >
-            <span className="sm:hidden">List house</span>
-            <span className="hidden sm:inline">List your house</span>
-          </Link>
+          ))}
         </nav>
+
+        {/* Mobile menu */}
+        <MobileNav />
       </div>
     </header>
   );
