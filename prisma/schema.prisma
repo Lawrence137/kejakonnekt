@@ -72,6 +72,45 @@ enum ReportStatus {
   DISMISSED
 }
 
+enum ApplicantType {
+  LANDLORD
+  AGENT
+}
+
+enum IdType {
+  NATIONAL_ID
+  PASSPORT
+}
+
+enum ApplicationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model LandlordApplication {
+  id              String            @id @default(cuid())
+  userId          String
+  user            User              @relation("ApplicantUser", fields: [userId], references: [id], onDelete: Cascade)
+  applicantType   ApplicantType
+  fullName        String
+  idType          IdType
+  idNumber        String
+  businessName    String?
+  idFrontPath     String            // pathname in the PRIVATE blob store, never a public URL
+  idBackPath      String
+  status          ApplicationStatus @default(PENDING)
+  rejectionReason String?
+  reviewedById    String?
+  reviewedBy      User?             @relation("ApplicationReviewer", fields: [reviewedById], references: [id])
+  reviewedAt      DateTime?
+  createdAt       DateTime          @default(now())
+
+  @@index([userId, status])
+  @@index([status, createdAt])
+  @@index([idNumber]) // lets admins spot one ID used on several accounts
+}
+
 // ---------- Models ----------
 
 model User {
@@ -86,6 +125,8 @@ model User {
   isVerified          Boolean  @default(false) // KejaKonnect-verified landlord/agent
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
+  applications         LandlordApplication[] @relation("ApplicantUser")
+  reviewedApplications LandlordApplication[] @relation("ApplicationReviewer")
 
   sessions  Session[]
   accounts  Account[]

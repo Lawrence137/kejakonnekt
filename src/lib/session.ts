@@ -6,8 +6,8 @@ export async function getSession() {
   return auth.api.getSession({ headers: await headers() });
 }
 
-export async function requireUser() {
+export async function requireUser(next = "/account") {
   const session = await getSession();
-  if (!session) redirect("/login");
+  if (!session) redirect(`/login?next=${encodeURIComponent(next)}`);
   return session.user;
 }
