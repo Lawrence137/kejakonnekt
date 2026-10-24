@@ -1,0 +1,210 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------- Enums ----------
+
+enum Role {
+  SEEKER
+  LANDLORD
+  AGENT
+  ADMIN
+}
+
+enum LocationType {
+  COUNTY
+  AREA
+  ESTATE
+}
+
+enum PropertyType {
+  BEDSITTER
+  STUDIO
+  ONE_BEDROOM
+  TWO_BEDROOM
+  THREE_BEDROOM
+  FOUR_PLUS_BEDROOM
+  MAISONETTE
+  BUNGALOW
+}
+
+enum ListingStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum Availability {
+  AVAILABLE
+  TAKEN
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+}
+
+enum ReportReason {
+  NUMBER_NOT_WORKING
+  HOUSE_TAKEN
+  FAKE_LISTING
+  WRONG_DETAILS
+  OTHER
+}
+
+enum ReportStatus {
+  OPEN
+  RESOLVED
+  DISMISSED
+}
+
+// ---------- Models ----------
+
+model User {
+  id         String   @id @default(cuid())
+  phone      String   @unique
+  name       String?
+  role       Role     @default(SEEKER)
+  isVerified Boolean  @default(false) // verified agent/landlord
+  createdAt  DateTime @default(now())
+
+  listings Listing[]
+  favorites Favorite[]
+  payments Payment[]
+  passes   ContactPass[]
+  unlocks  ContactUnlockLog[]
+  reports  Report[]
+}
+
+model Location {
+  id       String       @id @default(cuid())
+  name     String
+  slug     String       @unique
+  type     LocationType
+  parentId String?
+  parent   Location?    @relation("LocationTree", fields: [parentId], references: [id])
+  children Location[]   @relation("LocationTree")
+  listings Listing[]
+}
+
+model Amenity {
+  id       String    @id @default(cuid())
+  name     String    @unique
+  listings Listing[]
+}
+
+model Listing {
+  id           String        @id @default(cuid())
+  title        String
+  description  String
+  priceKes     Int
+  bedrooms     Int?
+  bathrooms    Int?
+  propertyType PropertyType
+  status       ListingStatus @default(PENDING)
+  availability Availability  @default(AVAILABLE)
+
+  // The paid-for data. NEVER select this in public queries.
+  contactPhone String
+
+  lastConfirmedAt DateTime @default(now()) // for 14-day auto-expiry
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  ownerId    String
+  owner      User     @relation(fields: [ownerId], references: [id])
+  locationId String
+  location   Location @relation(fields: [locationId], references: [id])
+
+  images    ListingImage[]
+  amenities Amenity[]
+  favorites Favorite[]
+  unlocks   ContactUnlockLog[]
+  reports   Report[]
+
+  @@index([status, availability, locationId])
+  @@index([priceKes])
+}
+
+model ListingImage {
+  id        String  @id @default(cuid())
+  url       String
+  position  Int     @default(0)
+  listingId String
+  listing   Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+}
+
+model Favorite {
+  id        String   @id @default(cuid())
+  userId    String
+  listingId String
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  listing   Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, listingId])
+}
+
+model Payment {
+  id          String        @id @default(cuid())
+  userId      String
+  user        User          @relation(fields: [userId], references: [id])
+  amountKes   Int
+  status      PaymentStatus @default(PENDING)
+  provider    String        // e.g. "intasend", "pesapal", "daraja"
+  providerRef String?       @unique // aggregator's transaction/invoice id
+  mpesaPhone  String
+  createdAt   DateTime      @default(now())
+  paidAt      DateTime?
+
+  pass ContactPass?
+}
+
+model ContactPass {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  paymentId String   @unique
+  payment   Payment  @relation(fields: [paymentId], references: [id])
+  startsAt  DateTime @default(now())
+  expiresAt DateTime
+
+  @@index([userId, expiresAt])
+}
+
+model ContactUnlockLog {
+  id        String   @id @default(cuid())
+  userId    String
+  listingId String
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+  listing   Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  @@index([userId, listingId])
+}
+
+model Report {
+  id        String       @id @default(cuid())
+  userId    String
+  listingId String
+  reason    ReportReason
+  note      String?
+  status    ReportStatus @default(OPEN)
+  createdAt DateTime     @default(now())
+  user      User         @relation(fields: [userId], references: [id])
+  listing   Listing      @relation(fields: [listingId], references: [id], onDelete: Cascade)
+}
