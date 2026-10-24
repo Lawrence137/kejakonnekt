@@ -113,6 +113,19 @@ model LandlordApplication {
 
 // ---------- Models ----------
 
+model AuditLog {
+  id         String   @id @default(cuid())
+  actorId    String
+  actor      User     @relation("AuditActor", fields: [actorId], references: [id])
+  action     String   // ID_VIEWED, APPLICATION_APPROVED, APPLICATION_REJECTED
+  targetType String
+  targetId   String
+  createdAt  DateTime @default(now())
+
+  @@index([targetType, targetId])
+  @@index([actorId, createdAt])
+}
+
 model User {
   id                  String   @id @default(cuid())
   name                String
@@ -127,6 +140,7 @@ model User {
   updatedAt           DateTime @updatedAt
   applications         LandlordApplication[] @relation("ApplicantUser")
   reviewedApplications LandlordApplication[] @relation("ApplicationReviewer")
+  auditLogs AuditLog[] @relation("AuditActor")
 
   sessions  Session[]
   accounts  Account[]
