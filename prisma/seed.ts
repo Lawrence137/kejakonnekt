@@ -41,16 +41,18 @@ async function main() {
   }
 
   // Sample landlord (fake number, for development only)
-  const owner = await db.user.upsert({
-    where: { phone: "+254700000001" },
-    update: {},
-    create: {
-      phone: "+254700000001",
-      name: "Sample Landlord",
-      role: "LANDLORD",
-      isVerified: true,
-    },
-  });
+const owner = await db.user.upsert({
+  where: { email: "sample.landlord@kejakonnect.invalid" },
+  update: {},
+  create: {
+    name: "Sample Landlord",
+    email: "sample.landlord@kejakonnect.invalid",
+    phoneNumber: "+254700000001",
+    phoneNumberVerified: true,
+    role: "LANDLORD",
+    isVerified: true,
+  },
+});
 
   // Sample listings (only created if this owner has none yet)
   const existing = await db.listing.count({ where: { ownerId: owner.id } });

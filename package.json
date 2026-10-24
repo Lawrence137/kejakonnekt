@@ -2,16 +2,18 @@
   "name": "kejakonnekt",
   "version": "0.1.0",
   "private": true,
-"scripts": {
-  "dev": "next dev",
-  "build": "prisma generate && next build",
-  "postinstall": "prisma generate",
-  "start": "next start",
-  "lint": "eslint"
-},
+  "scripts": {
+    "dev": "next dev",
+    "build": "prisma generate && next build",
+    "postinstall": "prisma generate",
+    "start": "next start",
+    "lint": "eslint"
+  },
   "dependencies": {
     "@base-ui/react": "^1.9.0",
+    "@better-auth/prisma-adapter": "^1.7.12",
     "@prisma/client": "^6.19.3",
+    "better-auth": "^1.7.12",
     "class-variance-authority": "^0.7.1",
     "cn": "^0.5.0",
     "lucide-react": "^1.61.0",
