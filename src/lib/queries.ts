@@ -1,6 +1,7 @@
 import { db } from "@/lib/db";
 import type { Prisma } from "@/generated/prisma/client";
 import type { ListingFilters } from "@/lib/filters";
+import { cache } from "react";
 
 // Public listing fields. contactPhone is deliberately NOT selected here:
 // it must only ever be returned by a server action that checks for a paid pass.
@@ -70,3 +71,27 @@ export async function getAreas() {
     orderBy: { name: "asc" },
   });
 }
+
+// cache() lets generateMetadata and the page share one database call.
+// Note: contactPhone is deliberately NOT selected.
+export const getListingById = cache(async (id: string) => {
+  return db.listing.findFirst({
+    where: { id, status: "APPROVED" },
+    select: {
+      id: true,
+      title: true,
+      description: true,
+      priceKes: true,
+      bedrooms: true,
+      bathrooms: true,
+      propertyType: true,
+      availability: true,
+      lastConfirmedAt: true,
+      location: {
+        select: { name: true, parent: { select: { name: true } } },
+      },
+      images: { select: { url: true }, orderBy: { position: "asc" } },
+      amenities: { select: { name: true } },
+    },
+  });
+});
