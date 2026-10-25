@@ -13,11 +13,10 @@ export const listingCardSelect = {
   bathrooms: true,
   propertyType: true,
   location: { select: { name: true } },
-  images: {
-    select: { url: true, thumbUrl: true },
-    orderBy: { position: "asc" as const },
-    take: 1,
-  },
+      images: {
+        select: { url: true, thumbUrl: true },
+        orderBy: { position: "asc" },
+      },
 } as const;
 
 export async function getFeaturedListings(limit = 6) {
