@@ -3,27 +3,38 @@ import { type NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { getSession } from "@/lib/session";
 
-const notFound = () => new NextResponse("Not found", { status: 404 });
+// Temporary debugging: logs why a request was refused (dev only).
+const notFound = (reason: string) => {
+  if (process.env.NODE_ENV !== "production") console.warn("[id-image]", reason);
+  return new NextResponse("Not found", { status: 404 });
+};
 
 export async function GET(request: NextRequest) {
-  // Auth is checked here, right next to the blob read, not in middleware.
   const session = await getSession();
-  if (!session || session.user.role !== "ADMIN") return notFound();
+  if (!session) return notFound("no session");
+  if (session.user.role !== "ADMIN") return notFound(`role is ${session.user.role}`);
 
   const id = request.nextUrl.searchParams.get("application");
   const side = request.nextUrl.searchParams.get("side");
-  if (!id || (side !== "front" && side !== "back")) return notFound();
+  if (!id || (side !== "front" && side !== "back")) return notFound("bad params");
 
-  // The path comes from OUR database, never from the URL.
   const application = await db.landlordApplication.findUnique({
     where: { id },
     select: { idFrontPath: true, idBackPath: true },
   });
-  if (!application) return notFound();
+  if (!application) return notFound("application not found");
 
   const pathname = side === "front" ? application.idFrontPath : application.idBackPath;
-  const result = await get(pathname, { access: "private" });
-  if (result?.statusCode !== 200) return notFound();
+
+  let result;
+  try {
+    result = await get(pathname, { access: "private" });
+  } catch (err) {
+    console.error("[id-image] blob error:", err);
+    return new NextResponse("Storage error", { status: 500 });
+  }
+  if (!result) return notFound(`blob missing: ${pathname}`);
+  if (result.statusCode !== 200) return notFound(`blob status ${result.statusCode}`);
 
   await db.auditLog.create({
     data: {
