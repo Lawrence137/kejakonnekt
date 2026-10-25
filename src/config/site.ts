@@ -10,4 +10,17 @@ export const siteConfig = {
   // Live numbers on the homepage only show once both are reached,
   // so an early marketplace never advertises "2 houses". Lower these to test.
   statsMin: { listings: 10, landlords: 5 },
+
+  // Fill these in before launch. Empty values are simply not shown.
+  contact: {
+    email: "", // e.g. "support@kejakonnect.co.ke"
+    phone: "", // e.g. "+254712345678"
+    whatsapp: "", // digits only, e.g. "254712345678"
+  },
+  social: { instagram: "", facebook: "", x: "", tiktok: "" }, // full URLs
+  company: {
+    legalName: "KejaKonnect",
+    odpcRegistration: "", // Data Protection Commissioner registration number
+  },
+  legalUpdated: "26 October 2026",
 };

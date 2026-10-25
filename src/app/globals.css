@@ -133,3 +133,25 @@
     animation: none;
   }
 }
+
+/* Small, quick pop for the account menu */
+@keyframes kk-pop {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.kk-pop {
+  animation: kk-pop 0.14s ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kk-pop {
+    animation: none;
+  }
+}

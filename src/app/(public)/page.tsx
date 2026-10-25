@@ -304,7 +304,7 @@ export default async function HomePage() {
       </section>
 
       {/* How it works */}
-      <section className="mx-auto max-w-6xl px-4 py-20">
+      <section id="how-it-works" className="mx-auto max-w-6xl scroll-mt-24 px-4 py-20">
         <Reveal>
           <h2 className="text-2xl font-bold tracking-tight sm:text-3xl">How it works</h2>
           <p className="mt-1 text-muted-foreground">
@@ -328,7 +328,7 @@ export default async function HomePage() {
       </section>
 
       {/* FAQ (plain HTML, no JavaScript needed) */}
-      <section className="mx-auto max-w-3xl px-4 pb-20">
+      <section id="faq" className="mx-auto max-w-3xl scroll-mt-24 px-4 pb-20">
         <h2 className="text-2xl font-bold tracking-tight sm:text-3xl">Good to know</h2>
         <div className="mt-6 border-t">
           {faqs.map((f) => (

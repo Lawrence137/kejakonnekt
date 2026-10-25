@@ -1,36 +1,23 @@
 import Link from "next/link";
-import { buttonVariants } from "@/components/ui/button";
-import { MobileNav } from "@/components/mobile-nav";
-import { navLinks } from "@/config/nav";
+import { DesktopNav } from "@/components/desktop-nav";
+import { Logo } from "@/components/logo";
+import { UserMenu } from "@/components/user-menu";
 
 export function SiteHeader() {
   return (
-    <header className="sticky top-0 z-40 border-b bg-background/80 backdrop-blur">
-      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-3 px-4">
-        <Link
-          href="/"
-          className="shrink-0 text-xl font-extrabold tracking-tight"
-        >
-          Keja<span className="text-primary">Konnect</span>
-        </Link>
-
-        {/* Desktop menu */}
-        <nav className="hidden items-center gap-2 md:flex">
-          {navLinks.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className={buttonVariants({
-                variant: link.highlight ? "default" : "ghost",
-              })}
-            >
-              {link.label}
-            </Link>
-          ))}
-        </nav>
-
-        {/* Mobile menu */}
-        <MobileNav />
+    <header className="sticky top-0 z-40 border-b bg-background/85 backdrop-blur-md">
+      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4">
+        <Logo />
+        <DesktopNav />
+        <div className="flex items-center gap-1">
+          <Link
+            href="/dashboard"
+            className="hidden rounded-full px-4 py-2 text-sm font-medium transition hover:bg-secondary lg:block"
+          >
+            List your house
+          </Link>
+          <UserMenu />
+        </div>
       </div>
     </header>
   );
