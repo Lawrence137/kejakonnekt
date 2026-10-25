@@ -4,7 +4,7 @@ import { formatKes, propertyTypeLabels } from "@/lib/format";
 import type { ListingCardData } from "@/lib/queries";
 
 export function ListingCard({ listing }: { listing: ListingCardData }) {
-  const image = listing.images[0]?.url;
+  const image = listing.images[0]?.thumbUrl ?? listing.images[0]?.url;
 
   return (
     <Link
