@@ -7,4 +7,7 @@ export const siteConfig = {
   },
   launchArea: "Lower Kabete",
   listingFreshDays: 14, // listings not confirmed within this many days are hidden
+  // Live numbers on the homepage only show once both are reached,
+  // so an early marketplace never advertises "2 houses". Lower these to test.
+  statsMin: { listings: 10, landlords: 5 },
 };

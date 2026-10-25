@@ -1,8 +1,17 @@
 import { cache } from "react";
-import type { Prisma } from "@/generated/prisma/client";
+import type { Prisma, PropertyType } from "@/generated/prisma/client";
 import { db } from "@/lib/db";
 import type { ListingFilters } from "@/lib/filters";
 import { freshCutoff } from "@/lib/listing-rules";
+
+// A listing counts as "live" when approved, available and recently confirmed.
+function liveWhere(): Prisma.ListingWhereInput {
+  return {
+    status: "APPROVED",
+    availability: "AVAILABLE",
+    lastConfirmedAt: { gte: freshCutoff() },
+  };
+}
 
 // Public listing fields. contactPhone is deliberately NOT selected here:
 // it must only ever be returned by a server action that checks for a paid pass.
@@ -14,6 +23,7 @@ export const listingCardSelect = {
   bathrooms: true,
   propertyType: true,
   location: { select: { name: true } },
+  owner: { select: { role: true } }, // only the role, never contact details
   images: {
     select: { url: true, thumbUrl: true },
     orderBy: { position: "asc" as const },
@@ -23,11 +33,7 @@ export const listingCardSelect = {
 
 export async function getFeaturedListings(limit = 6) {
   return db.listing.findMany({
-    where: {
-      status: "APPROVED",
-      availability: "AVAILABLE",
-      lastConfirmedAt: { gte: freshCutoff() },
-    },
+    where: liveWhere(),
     select: listingCardSelect,
     orderBy: { createdAt: "desc" },
     take: limit,
@@ -38,13 +44,51 @@ export type ListingCardData = Awaited<
   ReturnType<typeof getFeaturedListings>
 >[number];
 
+// How many live houses of each type (used for the homepage chips)
+export async function getTypeCounts() {
+  const rows = await db.listing.groupBy({
+    by: ["propertyType"],
+    where: liveWhere(),
+    _count: { _all: true },
+  });
+  return Object.fromEntries(
+    rows.map((r) => [r.propertyType, r._count._all]),
+  ) as Partial<Record<PropertyType, number>>;
+}
+
+export async function getTrustStats() {
+  const [listings, landlords] = await Promise.all([
+    db.listing.count({ where: liveWhere() }),
+    db.user.count({
+      where: { role: { in: ["LANDLORD", "AGENT"] }, isVerified: true },
+    }),
+  ]);
+  return { listings, landlords };
+}
+
+// Cover photos of the newest live listings, for the hero strip
+export async function getHeroPhotos(limit = 4) {
+  const rows = await db.listingImage.findMany({
+    where: { position: 0, thumbUrl: { not: null }, listing: liveWhere() },
+    orderBy: { listing: { createdAt: "desc" } },
+    take: limit,
+    select: {
+      thumbUrl: true,
+      listing: { select: { id: true, title: true } },
+    },
+  });
+  return rows.flatMap((r) =>
+    r.thumbUrl
+      ? [{ id: r.listing.id, title: r.listing.title, url: r.thumbUrl }]
+      : [],
+  );
+}
+
 export const PAGE_SIZE = 12;
 
 export async function searchListings(f: ListingFilters) {
   const where: Prisma.ListingWhereInput = {
-    status: "APPROVED",
-    availability: "AVAILABLE",
-    lastConfirmedAt: { gte: freshCutoff() },
+    ...liveWhere(),
     ...(f.area && {
       // matches the area itself, or any area inside a county
       location: { OR: [{ slug: f.area }, { parent: { slug: f.area } }] },
