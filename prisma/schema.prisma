@@ -44,6 +44,7 @@ enum ListingStatus {
   PENDING
   APPROVED
   REJECTED
+  REMOVED
 }
 
 enum Availability {
@@ -231,6 +232,8 @@ model Listing {
   bedrooms     Int?
   bathrooms    Int?
   propertyType PropertyType
+  removedReason String?
+  removedAt     DateTime?
   status       ListingStatus @default(PENDING)
   availability Availability  @default(AVAILABLE)
 
@@ -261,6 +264,7 @@ model ListingImage {
   url       String
   position  Int     @default(0)
   listingId String
+  thumbUrl String?
   listing   Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
 }
 
