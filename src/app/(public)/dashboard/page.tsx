@@ -1,8 +1,18 @@
 import Link from "next/link";
+import {
+  confirmAvailable,
+  markAvailable,
+  markTaken,
+} from "@/app/(public)/dashboard/listings/actions";
 import { buttonVariants } from "@/components/ui/button";
+import { siteConfig } from "@/config/site";
 import { db } from "@/lib/db";
-import { formatKes } from "@/lib/format";
+import { daysAgo, formatKes } from "@/lib/format";
+import { isStale } from "@/lib/listing-rules";
 import { requireUser } from "@/lib/session";
+
+const btn =
+  "rounded-lg border px-3 py-1.5 text-sm font-medium hover:bg-secondary";
 
 export default async function DashboardPage() {
   const user = await requireUser("/dashboard");
@@ -24,6 +34,8 @@ export default async function DashboardPage() {
             priceKes: true,
             status: true,
             availability: true,
+            lastConfirmedAt: true,
+            removedReason: true,
             images: {
               select: { url: true, thumbUrl: true },
               orderBy: { position: "asc" },
@@ -58,32 +70,91 @@ export default async function DashboardPage() {
             <div className="space-y-3">
               {listings.map((l) => {
                 const img = l.images[0]?.thumbUrl ?? l.images[0]?.url;
-                const badge =
-                  l.status === "REMOVED"
-                    ? { text: "Removed", cls: "bg-destructive/10 text-destructive" }
-                    : l.availability === "TAKEN"
-                      ? { text: "Taken", cls: "bg-muted text-muted-foreground" }
+                const removed = l.status === "REMOVED";
+                const taken = l.availability === "TAKEN";
+                const stale = isStale(l.lastConfirmedAt);
+
+                const badge = removed
+                  ? { text: "Removed", cls: "bg-destructive/10 text-destructive" }
+                  : taken
+                    ? { text: "Taken", cls: "bg-muted text-muted-foreground" }
+                    : stale
+                      ? { text: "Expired", cls: "bg-amber-100 text-amber-800" }
                       : { text: "Live", cls: "bg-primary/10 text-primary" };
+
                 return (
-                  <Link
-                    key={l.id}
-                    href={`/listings/${l.id}`}
-                    className="flex items-center gap-4 rounded-xl border bg-background p-3 hover:shadow-md"
-                  >
-                    <div className="size-16 shrink-0 overflow-hidden rounded-lg bg-secondary">
-                      {img && (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img src={img} alt="" className="h-full w-full object-cover" />
-                      )}
+                  <div key={l.id} className="rounded-xl border bg-background p-3">
+                    <div className="flex items-center gap-4">
+                      <div className="size-16 shrink-0 overflow-hidden rounded-lg bg-secondary">
+                        {img && (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img src={img} alt="" className="h-full w-full object-cover" />
+                        )}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        {removed ? (
+                          <p className="truncate font-semibold">{l.title}</p>
+                        ) : (
+                          <Link href={`/listings/${l.id}`} className="block truncate font-semibold hover:underline">
+                            {l.title}
+                          </Link>
+                        )}
+                        <p className="text-sm text-muted-foreground">
+                          {formatKes(l.priceKes)}/month
+                        </p>
+                      </div>
+                      <span className={`rounded-full px-3 py-1 text-xs font-semibold ${badge.cls}`}>
+                        {badge.text}
+                      </span>
                     </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate font-semibold">{l.title}</p>
-                      <p className="text-sm text-muted-foreground">{formatKes(l.priceKes)}/month</p>
-                    </div>
-                    <span className={`rounded-full px-3 py-1 text-xs font-semibold ${badge.cls}`}>
-                      {badge.text}
-                    </span>
-                  </Link>
+
+                    {removed ? (
+                      <p className="mt-3 rounded-lg bg-destructive/10 p-3 text-sm">
+                        Removed by KejaKonnect{l.removedReason ? `: ${l.removedReason}` : "."}
+                      </p>
+                    ) : (
+                      <>
+                        {!taken && (
+                          <p className="mt-3 text-xs text-muted-foreground">
+                            {stale
+                              ? "Hidden from search. Confirm it's still available to show it again."
+                              : `Confirmed ${daysAgo(l.lastConfirmedAt)}. Confirm at least every ${siteConfig.listingFreshDays} days or it's hidden from search.`}
+                          </p>
+                        )}
+                        <div className="mt-3 flex flex-wrap gap-2">
+                          <Link href={`/dashboard/listings/${l.id}/edit`} className={btn}>
+                            Edit
+                          </Link>
+                          {taken ? (
+                            <form action={markAvailable}>
+                              <input type="hidden" name="id" value={l.id} />
+                              <button type="submit" className={btn}>Mark available</button>
+                            </form>
+                          ) : (
+                            <>
+                              <form action={confirmAvailable}>
+                                <input type="hidden" name="id" value={l.id} />
+                                <button
+                                  type="submit"
+                                  className={
+                                    stale
+                                      ? "rounded-lg bg-primary px-3 py-1.5 text-sm font-semibold text-primary-foreground hover:opacity-90"
+                                      : btn
+                                  }
+                                >
+                                  Confirm still available
+                                </button>
+                              </form>
+                              <form action={markTaken}>
+                                <input type="hidden" name="id" value={l.id} />
+                                <button type="submit" className={btn}>Mark as taken</button>
+                              </form>
+                            </>
+                          )}
+                        </div>
+                      </>
+                    )}
+                  </div>
                 );
               })}
             </div>

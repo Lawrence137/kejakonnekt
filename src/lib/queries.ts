@@ -1,7 +1,8 @@
-import { db } from "@/lib/db";
-import type { Prisma } from "@/generated/prisma/client";
-import type { ListingFilters } from "@/lib/filters";
 import { cache } from "react";
+import type { Prisma } from "@/generated/prisma/client";
+import { db } from "@/lib/db";
+import type { ListingFilters } from "@/lib/filters";
+import { freshCutoff } from "@/lib/listing-rules";
 
 // Public listing fields. contactPhone is deliberately NOT selected here:
 // it must only ever be returned by a server action that checks for a paid pass.
@@ -13,15 +14,20 @@ export const listingCardSelect = {
   bathrooms: true,
   propertyType: true,
   location: { select: { name: true } },
-      images: {
-        select: { url: true, thumbUrl: true },
-        orderBy: { position: "asc" },
-      },
+  images: {
+    select: { url: true, thumbUrl: true },
+    orderBy: { position: "asc" as const },
+    take: 1,
+  },
 } as const;
 
 export async function getFeaturedListings(limit = 6) {
   return db.listing.findMany({
-    where: { status: "APPROVED", availability: "AVAILABLE" },
+    where: {
+      status: "APPROVED",
+      availability: "AVAILABLE",
+      lastConfirmedAt: { gte: freshCutoff() },
+    },
     select: listingCardSelect,
     orderBy: { createdAt: "desc" },
     take: limit,
@@ -38,6 +44,7 @@ export async function searchListings(f: ListingFilters) {
   const where: Prisma.ListingWhereInput = {
     status: "APPROVED",
     availability: "AVAILABLE",
+    lastConfirmedAt: { gte: freshCutoff() },
     ...(f.area && {
       // matches the area itself, or any area inside a county
       location: { OR: [{ slug: f.area }, { parent: { slug: f.area } }] },
@@ -89,7 +96,10 @@ export const getListingById = cache(async (id: string) => {
       location: {
         select: { name: true, parent: { select: { name: true } } },
       },
-      images: { select: { url: true }, orderBy: { position: "asc" } },
+      images: {
+        select: { url: true, thumbUrl: true },
+        orderBy: { position: "asc" },
+      },
       amenities: { select: { name: true } },
     },
   });

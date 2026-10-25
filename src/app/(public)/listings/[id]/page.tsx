@@ -6,6 +6,7 @@ import { ContactCard } from "@/components/contact-card";
 import { ListingGallery } from "@/components/listing-gallery";
 import { daysAgo, formatKes, propertyTypeLabels } from "@/lib/format";
 import { getListingById } from "@/lib/queries";
+import { isStale } from "@/lib/listing-rules";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -26,6 +27,7 @@ export default async function ListingDetailPage({ params }: Props) {
   if (!listing) notFound();
 
   const taken = listing.availability === "TAKEN";
+  const stale = isStale(listing.lastConfirmedAt);
   const where = [listing.location.name, listing.location.parent?.name]
     .filter(Boolean)
     .join(", ");
@@ -108,7 +110,7 @@ export default async function ListingDetailPage({ params }: Props) {
         {/* Contact */}
         <aside>
           <div className="lg:sticky lg:top-24">
-            <ContactCard taken={taken} />
+            <ContactCard taken={taken} stale={stale} />
           </div>
         </aside>
       </div>

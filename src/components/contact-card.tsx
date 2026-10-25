@@ -1,13 +1,32 @@
 import { Lock, ShieldCheck } from "lucide-react";
 import { siteConfig } from "@/config/site";
 
-export function ContactCard({ taken }: { taken: boolean }) {
+export function ContactCard({
+  taken,
+  stale = false,
+}: {
+  taken: boolean;
+  stale?: boolean;
+}) {
   if (taken) {
     return (
       <div className="rounded-2xl border bg-secondary/50 p-6">
         <p className="font-semibold">This house has been taken</p>
         <p className="mt-1 text-sm text-muted-foreground">
           Browse other available houses in {siteConfig.launchArea}.
+        </p>
+      </div>
+    );
+  }
+
+  if (stale) {
+    return (
+      <div className="rounded-2xl border bg-secondary/50 p-6">
+        <p className="font-semibold">Availability not confirmed</p>
+        <p className="mt-1 text-sm text-muted-foreground">
+          The landlord hasn&apos;t recently confirmed this house is still available, so
+          we&apos;ve paused contact until they do. Browse other houses in{" "}
+          {siteConfig.launchArea}.
         </p>
       </div>
     );
@@ -29,7 +48,7 @@ export function ContactCard({ taken }: { taken: boolean }) {
 
       <button
         type="button"
-        // TODO: wire up in the payments phase (check pass, then STK push)
+        // TODO: wire up in the payments step (check pass, then STK push)
         className="mt-5 w-full rounded-xl bg-primary px-4 py-3 font-semibold text-primary-foreground transition hover:opacity-90"
       >
         Unlock contact · KES {siteConfig.pass.priceKes}

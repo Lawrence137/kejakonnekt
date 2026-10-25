@@ -29,26 +29,51 @@ const defaultBedrooms: Record<string, string> = {
 const field =
   "h-12 w-full rounded-xl border bg-background px-4 outline-none focus:ring-2 focus:ring-ring";
 
+export type ListingFormInitial = {
+  title: string;
+  propertyType: string;
+  bedrooms: number;
+  bathrooms: number;
+  priceKes: number;
+  locationId: string;
+  description: string;
+  amenityIds: string[];
+  contactPhone: string;
+  images: { url: string; thumbUrl: string }[];
+};
+
 export function ListingForm({
   areas,
   amenities,
   defaultPhone,
+  listingId,
+  initial,
 }: {
   areas: { id: string; label: string }[];
   amenities: { id: string; name: string }[];
   defaultPhone: string;
+  listingId?: string;
+  initial?: ListingFormInitial;
 }) {
   const router = useRouter();
-  const [title, setTitle] = useState("");
-  const [propertyType, setPropertyType] = useState("ONE_BEDROOM");
-  const [bedrooms, setBedrooms] = useState("1");
-  const [bathrooms, setBathrooms] = useState("1");
-  const [price, setPrice] = useState("");
-  const [locationId, setLocationId] = useState(areas[0]?.id ?? "");
-  const [description, setDescription] = useState("");
-  const [amenityIds, setAmenityIds] = useState<string[]>([]);
-  const [contactPhone, setContactPhone] = useState(defaultPhone);
-  const [photos, setPhotos] = useState<Photo[]>([]);
+  const [title, setTitle] = useState(initial?.title ?? "");
+  const [propertyType, setPropertyType] = useState(initial?.propertyType ?? "ONE_BEDROOM");
+  const [bedrooms, setBedrooms] = useState(String(initial?.bedrooms ?? 1));
+  const [bathrooms, setBathrooms] = useState(String(initial?.bathrooms ?? 1));
+  const [price, setPrice] = useState(initial ? String(initial.priceKes) : "");
+  const [locationId, setLocationId] = useState(initial?.locationId ?? areas[0]?.id ?? "");
+  const [description, setDescription] = useState(initial?.description ?? "");
+  const [amenityIds, setAmenityIds] = useState<string[]>(initial?.amenityIds ?? []);
+  const [contactPhone, setContactPhone] = useState(initial?.contactPhone ?? defaultPhone);
+  const [photos, setPhotos] = useState<Photo[]>(
+    initial?.images.map((img) => ({
+      id: img.url,
+      preview: img.thumbUrl,
+      status: "done" as const,
+      url: img.url,
+      thumbUrl: img.thumbUrl,
+    })) ?? [],
+  );
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -98,8 +123,8 @@ export function ListingForm({
     setError("");
 
     try {
-      const res = await fetch("/api/listings", {
-        method: "POST",
+      const res = await fetch(listingId ? `/api/listings/${listingId}` : "/api/listings", {
+        method: listingId ? "PATCH" : "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           title,
@@ -315,7 +340,11 @@ export function ListingForm({
         disabled={loading || uploading}
         className="h-12 w-full rounded-xl bg-primary font-semibold text-primary-foreground transition hover:opacity-90 disabled:opacity-60"
       >
-        {uploading ? "Uploading photos..." : loading ? "Publishing..." : "Publish listing"}
+        {uploading
+          ? "Uploading photos..."
+          : loading
+            ? listingId ? "Saving..." : "Publishing..."
+            : listingId ? "Save changes" : "Publish listing"}
       </button>
     </form>
   );
