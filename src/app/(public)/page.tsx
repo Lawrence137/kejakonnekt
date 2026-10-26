@@ -1,5 +1,6 @@
 import type { CSSProperties } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import type { LucideIcon } from "lucide-react";
 import {
   ArrowRight,
@@ -132,47 +133,56 @@ export default async function HomePage() {
   return (
     <>
       {/* Hero */}
-      <section className="relative overflow-hidden">
+      <section className="relative isolate overflow-hidden bg-[#263c32] text-white">
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute -top-48 left-1/2 h-[30rem] w-[64rem] -translate-x-1/2 rounded-full bg-primary/10 blur-3xl"
-        />
-        <div className="relative mx-auto max-w-6xl px-4 pb-6 pt-14 text-center sm:pt-24">
+          className="pointer-events-none absolute inset-0"
+        >
+          <Image
+            src="/images/hero/Kejakonnect hero bg.webp"
+            alt=""
+            fill
+            sizes="100vw"
+            className="object-cover object-[center_58%]"
+          />
+          <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(18,39,30,0.76)_0%,rgba(18,39,30,0.68)_55%,rgba(18,39,30,0.76)_100%)] md:bg-[linear-gradient(90deg,rgba(18,39,30,0.82)_0%,rgba(18,39,30,0.72)_50%,rgba(18,39,30,0.54)_100%)]" />
+        </div>
+        <div className="relative mx-auto flex max-w-6xl flex-col items-center px-4 pb-12 pt-16 text-center sm:pb-16 sm:pt-24">
           <p
-            className="kk-rise mx-auto inline-flex items-center gap-1.5 rounded-full border bg-background px-3.5 py-1.5 text-sm font-medium shadow-sm"
+            className="kk-rise inline-flex items-center gap-2 rounded-full border border-white/25 bg-black/20 px-3.5 py-2 text-xs font-semibold uppercase tracking-[0.13em] text-white backdrop-blur-sm"
             style={rise(0)}
           >
-            <BadgeCheck className="size-4 text-primary" />
+            <BadgeCheck className="size-4 text-[#d8c18b]" />
             Every landlord ID-verified
           </p>
 
           <h1
-            className="kk-rise mx-auto mt-6 max-w-3xl text-4xl font-extrabold leading-[1.05] tracking-tight sm:text-6xl"
+            className="kk-rise mt-7 max-w-4xl font-serif text-5xl font-medium leading-[1.04] tracking-[-0.035em] sm:text-6xl lg:text-7xl"
             style={rise(80)}
           >
             Rentals you can trust in{" "}
-            <span className="text-primary">{siteConfig.launchArea}</span>.
+            <span className="text-[#e7d6aa]">{siteConfig.launchArea}</span>.
           </h1>
 
           <p
-            className="kk-rise mx-auto mt-5 max-w-xl text-lg text-muted-foreground"
+            className="kk-rise mt-6 max-w-2xl text-base leading-7 text-white/90 sm:text-lg"
             style={rise(160)}
           >
             Browse real photos and prices for free. Pay only when you&apos;re
             ready to call a verified landlord or agent.
           </p>
 
-          <div className="kk-rise mt-10" style={rise(240)}>
+          <div className="kk-rise mt-8 w-full max-w-3xl" style={rise(240)}>
             <SearchForm areas={areas} />
           </div>
 
           <ul
-            className="kk-rise mt-7 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-muted-foreground"
+            className="kk-rise mt-6 flex flex-wrap items-center justify-center gap-x-6 gap-y-3 text-sm text-white/90"
             style={rise(320)}
           >
             {["ID-checked by our team", "Free to browse", "No deposit before viewing"].map((t) => (
               <li key={t} className="flex items-center gap-1.5">
-                <Check className="size-4 text-primary" />
+                <Check className="size-4 text-[#e7d6aa]" />
                 {t}
               </li>
             ))}
@@ -181,14 +191,12 @@ export default async function HomePage() {
 
         {/* Real photos of the newest houses (only when there are four) */}
         {heroPhotos.length === 4 && (
-          <div className="relative mx-auto mt-12 hidden max-w-6xl grid-cols-4 gap-4 px-4 pb-4 md:grid">
+          <div className="relative mx-auto hidden max-w-6xl grid-cols-4 gap-4 px-4 pb-10 md:grid">
             {heroPhotos.map((p, i) => (
               <Link
                 key={p.id}
                 href={`/listings/${p.id}`}
-                className={`kk-rise group relative block aspect-[3/4] overflow-hidden rounded-3xl bg-secondary ${
-                  i % 2 === 1 ? "mt-8" : ""
-                }`}
+                className="kk-rise group relative block aspect-[5/3] overflow-hidden rounded-xl bg-secondary ring-1 ring-black/5 sm:rounded-2xl"
                 style={rise(400 + i * 90)}
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -196,8 +204,12 @@ export default async function HomePage() {
                   src={p.url}
                   alt={p.title}
                   loading="lazy"
-                  className="h-full w-full object-cover transition duration-700 group-hover:scale-105"
+                  className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]"
                 />
+                <span className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                <span className="absolute inset-x-0 bottom-0 truncate px-3 pb-3 text-xs font-medium text-white sm:px-4 sm:pb-4 sm:text-sm">
+                  {p.title}
+                </span>
               </Link>
             ))}
           </div>
@@ -206,17 +218,17 @@ export default async function HomePage() {
 
       {/* House types */}
       {typeChips.length > 0 && (
-        <section className="mx-auto max-w-6xl px-4 pt-10">
+        <section className="mx-auto max-w-6xl px-4 pt-8">
           <div className="flex gap-3 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             {typeChips.map(({ type, count, Icon }) => (
               <Link
                 key={type}
                 href={`/listings?type=${type}`}
-                className="flex shrink-0 items-center gap-2.5 rounded-full border bg-background px-5 py-3 text-sm font-medium transition hover:border-foreground/40 hover:shadow-sm"
+                className="flex shrink-0 items-center gap-2.5 rounded-full border border-border bg-background px-4 py-2.5 text-sm font-medium transition-colors hover:border-primary/50 hover:bg-secondary/60"
               >
-                <Icon className="size-5 text-primary" />
+                <Icon className="size-4 text-primary" />
                 {propertyTypeLabels[type]}
-                <span className="text-muted-foreground">{count}</span>
+                <span className="text-xs tabular-nums text-muted-foreground">{count}</span>
               </Link>
             ))}
           </div>
@@ -224,10 +236,13 @@ export default async function HomePage() {
       )}
 
       {/* Latest houses (no animation, so it never depends on JavaScript) */}
-      <section className="mx-auto max-w-6xl px-4 py-14">
-        <div className="mb-8 flex items-end justify-between gap-4">
+      <section className="mx-auto max-w-6xl px-4 py-16 sm:py-20">
+        <div className="mb-8 flex items-end justify-between gap-4 border-b border-border pb-5">
           <div>
-            <h2 className="text-2xl font-bold tracking-tight sm:text-3xl">
+            <p className="mb-2 text-xs font-semibold uppercase tracking-[0.14em] text-primary">
+              Available now
+            </p>
+            <h2 className="font-serif text-3xl font-medium tracking-tight sm:text-4xl">
               Latest houses in {siteConfig.launchArea}
             </h2>
             <p className="mt-1 text-muted-foreground">
@@ -236,14 +251,14 @@ export default async function HomePage() {
           </div>
           <Link
             href="/listings"
-            className="hidden items-center gap-1 text-sm font-semibold hover:underline sm:inline-flex"
+            className="hidden items-center gap-2 text-sm font-semibold text-primary transition-colors hover:text-foreground sm:inline-flex"
           >
-            Show all <ArrowRight className="size-4" />
+            Show all houses <ArrowRight className="size-4" />
           </Link>
         </div>
 
         {listings.length === 0 ? (
-          <p className="rounded-2xl border border-dashed p-12 text-center text-muted-foreground">
+          <p className="rounded-xl border border-dashed border-border p-12 text-center text-muted-foreground">
             No houses yet. Check back soon!
           </p>
         ) : (
@@ -256,7 +271,7 @@ export default async function HomePage() {
 
         <Link
           href="/listings"
-          className="mt-8 block rounded-xl border py-3 text-center font-semibold hover:bg-secondary sm:hidden"
+          className="mt-8 block rounded-lg border border-border py-3 text-center text-sm font-semibold transition-colors hover:bg-secondary sm:hidden"
         >
           Show all houses
         </Link>
@@ -264,12 +279,12 @@ export default async function HomePage() {
 
       {/* Trust */}
       <section className="mx-auto max-w-6xl px-4">
-        <div className="rounded-[2rem] bg-secondary/60 px-6 py-14 sm:px-12 sm:py-16">
+        <div className="rounded-2xl border border-border bg-[#f2f3ed] px-6 py-10 sm:px-10 sm:py-12">
           <Reveal>
-            <p className="text-sm font-semibold uppercase tracking-wide text-primary">
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-primary">
               Why KejaKonnect
             </p>
-            <h2 className="mt-2 max-w-xl text-3xl font-extrabold tracking-tight sm:text-4xl">
+            <h2 className="mt-3 max-w-xl font-serif text-3xl font-medium tracking-tight sm:text-4xl">
               Rentals you can trust, before you pay a shilling.
             </h2>
           </Reveal>
@@ -281,22 +296,22 @@ export default async function HomePage() {
                 { value: String(stats.listings), label: "houses available right now" },
                 { value: `${listingFreshDays} days`, label: "max time before availability is rechecked" },
               ].map((s) => (
-                <div key={s.label} className="rounded-2xl bg-background px-6 py-5 shadow-sm">
-                  <p className="text-3xl font-extrabold text-primary">{s.value}</p>
+                <div key={s.label} className="border-l-2 border-primary/50 py-1 pl-4">
+                  <p className="text-2xl font-semibold tabular-nums text-foreground">{s.value}</p>
                   <p className="mt-1 text-sm text-muted-foreground">{s.label}</p>
                 </div>
               ))}
             </Reveal>
           )}
 
-          <RevealGroup className="mt-10 grid gap-5 sm:grid-cols-2">
+          <RevealGroup className="mt-8 grid gap-0 sm:grid-cols-2 sm:gap-x-10">
             {trustPoints.map(({ Icon, title, text }) => (
-              <RevealItem key={title} className="rounded-2xl bg-background p-6 shadow-sm">
-                <span className="flex size-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                  <Icon className="size-6" />
+              <RevealItem key={title} className="border-t border-border/80 py-6">
+                <span className="flex size-9 items-center justify-center rounded-lg bg-white text-primary ring-1 ring-border">
+                  <Icon className="size-5" />
                 </span>
-                <h3 className="mt-4 font-semibold">{title}</h3>
-                <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{text}</p>
+                <h3 className="mt-3 font-semibold">{title}</h3>
+                <p className="mt-1.5 max-w-lg text-sm leading-6 text-muted-foreground">{text}</p>
               </RevealItem>
             ))}
           </RevealGroup>
@@ -304,21 +319,26 @@ export default async function HomePage() {
       </section>
 
       {/* How it works */}
-      <section id="how-it-works" className="mx-auto max-w-6xl scroll-mt-24 px-4 py-20">
+      <section id="how-it-works" className="mx-auto max-w-6xl scroll-mt-24 px-4 py-16 sm:py-20">
         <Reveal>
-          <h2 className="text-2xl font-bold tracking-tight sm:text-3xl">How it works</h2>
+          <p className="mb-2 text-xs font-semibold uppercase tracking-[0.14em] text-primary">
+            Three simple steps
+          </p>
+          <h2 className="font-serif text-3xl font-medium tracking-tight sm:text-4xl">How it works</h2>
           <p className="mt-1 text-muted-foreground">
             Simple, and you stay in control of when you pay.
           </p>
         </Reveal>
-        <RevealGroup className="mt-10 grid gap-6 sm:grid-cols-3">
+        <RevealGroup className="mt-8 grid gap-0 sm:grid-cols-3 sm:divide-x sm:divide-border">
           {steps.map(({ Icon, title, text }, i) => (
-            <RevealItem key={title}>
-              <div className="flex items-center gap-3">
-                <span className="flex size-12 items-center justify-center rounded-full bg-primary text-primary-foreground">
+            <RevealItem key={title} className="border-t border-border py-6 sm:px-6 sm:first:pl-0 sm:last:pr-0">
+              <div className="flex items-center justify-between">
+                <span className="flex size-10 items-center justify-center rounded-lg bg-secondary text-primary">
                   <Icon className="size-5" />
                 </span>
-                <span className="text-sm font-semibold text-muted-foreground">Step {i + 1}</span>
+                <span className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+                  Step 0{i + 1}
+                </span>
               </div>
               <h3 className="mt-4 text-lg font-semibold">{title}</h3>
               <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{text}</p>
@@ -329,13 +349,16 @@ export default async function HomePage() {
 
       {/* FAQ (plain HTML, no JavaScript needed) */}
       <section id="faq" className="mx-auto max-w-3xl scroll-mt-24 px-4 pb-20">
-        <h2 className="text-2xl font-bold tracking-tight sm:text-3xl">Good to know</h2>
-        <div className="mt-6 border-t">
+        <p className="mb-2 text-xs font-semibold uppercase tracking-[0.14em] text-primary">
+          Helpful information
+        </p>
+        <h2 className="font-serif text-3xl font-medium tracking-tight sm:text-4xl">Good to know</h2>
+        <div className="mt-6 border-y border-border">
           {faqs.map((f) => (
             <details key={f.q} className="group border-b py-5">
               <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-semibold [&::-webkit-details-marker]:hidden">
                 {f.q}
-                <ChevronDown className="size-5 shrink-0 text-muted-foreground transition group-open:rotate-180" />
+                <ChevronDown className="size-4 shrink-0 text-muted-foreground transition-transform group-open:rotate-180" />
               </summary>
               <p className="mt-3 leading-relaxed text-muted-foreground">{f.a}</p>
             </details>
@@ -346,12 +369,15 @@ export default async function HomePage() {
       {/* Landlord CTA */}
       <section className="mx-auto max-w-6xl px-4 pb-20">
         <Reveal>
-          <div className="grid items-center gap-8 rounded-[2rem] bg-primary px-6 py-12 text-primary-foreground sm:px-12 lg:grid-cols-[1.2fr_1fr]">
+          <div className="grid items-center gap-8 rounded-2xl bg-[#18372c] px-6 py-10 text-white sm:px-10 sm:py-12 lg:grid-cols-[1.2fr_1fr]">
             <div>
-              <h2 className="text-3xl font-extrabold tracking-tight sm:text-4xl">
+              <p className="mb-2 text-xs font-semibold uppercase tracking-[0.14em] text-[#e7d6aa]">
+                For landlords and agents
+              </p>
+              <h2 className="font-serif text-3xl font-medium tracking-tight sm:text-4xl">
                 Got a house to let in {siteConfig.launchArea}?
               </h2>
-              <p className="mt-3 max-w-md opacity-90">
+              <p className="mt-3 max-w-md text-sm leading-6 text-white/75">
                 List it for free and reach tenants who are ready to view.
               </p>
               <Link
@@ -367,8 +393,8 @@ export default async function HomePage() {
                 "A Verified badge builds trust with tenants",
                 "Tenants pay to reach you, so calls are serious",
               ].map((t) => (
-                <li key={t} className="flex items-start gap-2.5">
-                  <Check className="mt-0.5 size-5 shrink-0" />
+                <li key={t} className="flex items-start gap-2.5 border-t border-white/15 py-3 text-sm text-white/90">
+                  <Check className="mt-0.5 size-4 shrink-0 text-[#e7d6aa]" />
                   {t}
                 </li>
               ))}
