@@ -21,7 +21,7 @@ import { Reveal, RevealGroup, RevealItem } from "@/components/motion";
 import { SearchForm } from "@/components/search-form";
 import { buttonVariants } from "@/components/ui/button";
 import { siteConfig } from "@/config/site";
-import type { PropertyType } from "@/generated/prisma/client";
+import type { PropertyType } from "@prisma/client";
 import { propertyTypeLabels } from "@/lib/format";
 import {
   getAreas,

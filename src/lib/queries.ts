@@ -1,5 +1,5 @@
 import { cache } from "react";
-import type { Prisma, PropertyType } from "@/generated/prisma/client";
+import type { Prisma, PropertyType } from "@prisma/client";
 import { db } from "@/lib/db";
 import type { ListingFilters } from "@/lib/filters";
 import { freshCutoff } from "@/lib/listing-rules";

@@ -1,4 +1,4 @@
-import type { PropertyType } from "@/generated/prisma/client";
+import type { PropertyType } from "@prisma/client";
 import { db } from "@/lib/db";
 import { propertyTypeLabels } from "@/lib/format";
 import { normalizeKenyanPhone } from "@/lib/phone";

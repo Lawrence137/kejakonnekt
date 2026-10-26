@@ -16,6 +16,11 @@ const nextConfig: NextConfig = {
       },
     },
   },
+  // Make sure Prisma's query engine is included in every serverless function on Vercel
+  outputFileTracingIncludes: {
+    "/*": ["./node_modules/.prisma/client/**/*"],
+    "/api/**/*": ["./node_modules/.prisma/client/**/*"],
+  },
 };
 
 export default nextConfig;

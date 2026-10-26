@@ -1,6 +1,6 @@
 import { put } from "@vercel/blob";
 import { NextResponse } from "next/server";
-import type { ApplicantType, IdType } from "@/generated/prisma/client";
+import type { ApplicantType, IdType } from "@prisma/client";
 import { db } from "@/lib/db";
 import { getSession } from "@/lib/session";
 

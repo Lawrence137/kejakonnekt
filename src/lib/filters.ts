@@ -1,4 +1,4 @@
-import type { PropertyType } from "@/generated/prisma/client";
+import type { PropertyType } from "@prisma/client";
 import { propertyTypeLabels } from "@/lib/format";
 
 export type ListingFilters = {

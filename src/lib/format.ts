@@ -1,4 +1,4 @@
-import type { PropertyType } from "@/generated/prisma/client";
+import type { PropertyType } from "@prisma/client";
 
 export const formatKes = (amount: number) =>
   `KES ${amount.toLocaleString("en-KE")}`;
